@@ -168,7 +168,7 @@ UINT CMutilThread2Dlg::ThreadFun(LPVOID lpParam)
 	CMutilThread2Dlg* pDlg = (CMutilThread2Dlg*)lpParam;
 	CString str;
 	
-	for (;;) {
+	for (int i = 0; i < 50; i++) {
 		if (pDlg->isRunning == FALSE) {
 			return 0;
 		}
@@ -177,7 +177,7 @@ UINT CMutilThread2Dlg::ThreadFun(LPVOID lpParam)
 		pDlg->g_ctrticalSection.Unlock();
 		str.Format(_T("%d"), pDlg->sum);
 		::SetDlgItemText(AfxGetApp()->m_pMainWnd->m_hWnd, IDC_EDIT_SUM, str);
-		Sleep(10);
+		Sleep(500);
 	}
 	
 	return 0;
@@ -240,8 +240,17 @@ void CMutilThread2Dlg::OnBnClickedBtnStop()
 	// TODO: 在此添加控件通知处理程序代码
 	if (myThread) {
 		isRunning = FALSE;
-		//WaitForSingleObject(myThread, 5000);
+		//WaitForSingleObject(myThread, 1000);
 		ThreadFun_WaitForObject(myThread);
+		/*DWORD dExitCode;
+		if (GetExitCodeThread(myThread->m_hThread, &dExitCode)) {
+			if (dExitCode == STILL_ACTIVE)
+				MessageBox(_T("1"));
+			else
+				MessageBox(_T("2"));
+		}
+		else
+			MessageBox(_T("0"));*/
 		delete myThread;
 		myThread = NULL;
 	}
@@ -258,7 +267,7 @@ void CMutilThread2Dlg::ThreadFun_WaitForObject(CWinThread* pThread)
 	{
 		DWORD result;
 		MSG msg;
-		result = ::MsgWaitForMultipleObjects(1, &pThread->m_hThread, FALSE, INFINITE, QS_ALLINPUT);
+		result = MsgWaitForMultipleObjects(1, &pThread->m_hThread, FALSE, INFINITE, QS_ALLINPUT);
 
 		if (result == WAIT_OBJECT_0 + 1)
 		{
@@ -284,6 +293,8 @@ void CMutilThread2Dlg::OnClose()
 
 	
 	OnBnClickedBtnStop();
+	
+	
 
 	CDialogEx::OnClose();
 }
